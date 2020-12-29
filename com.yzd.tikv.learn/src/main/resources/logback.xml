@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+    <!-- 常量定义start -->
+    <!-- 默认日志输出格式 -->
+    <!--<property name="DEFAULT_PATTERN" value="%d{yyyy-MM-dd HH:mm:ss.SSS}$$%contextName{}$$%-5level{}$$%file{}/%line{}$$shopcrm-service$$%msg%n" />-->
+    <property name="DEFAULT_PATTERN" value="%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - [%file:%line] - %msg%n"/>
+    <property name="MAX_HISTORY" value="15"/>
+    <property name="USER_HOME" value="/home/logs/"/>
+    <!-- 常量定义end -->
+
+    <!-- 默认日志的console appender，本地使用的日志 -->
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %highlight(%-5level)
+                %cyan(%logger{50})-%yellow([%file:%line]) - %msg%n
+            </pattern>
+            <charset>UTF-8</charset>
+        </encoder>
+    </appender>
+    <!-- 服务器上使用的appender start -->
+    <!-- 默认的file appender，按天切分日志 -->
+    <appender name="ROLLING_FILE_DEFAULT" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${USER_HOME}/proxy.log</file>
+        <append>true</append>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>${USER_HOME}/proxy_%d{yyyy-MM-dd}.log.%i</fileNamePattern>
+            <maxHistory>${MAX_HISTORY}</maxHistory>
+            <maxFileSize>2GB</maxFileSize>
+        </rollingPolicy>
+        <encoder>
+            <pattern>${DEFAULT_PATTERN}</pattern>
+            <charset>UTF-8</charset>
+        </encoder>
+    </appender>
+
+
+    <!-- 错误日志，按天切分 -->
+    <appender name="ROLLING_FILE_ERROR" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>ERROR</level>
+            <onMatch>ACCEPT</onMatch>
+            <onMismatch>DENY</onMismatch>
+        </filter>
+        <file>${USER_HOME}/proxy.err</file>
+        <append>true</append>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>${USER_HOME}/proxy_%d{yyyy-MM-dd}.err%i</fileNamePattern>
+            <maxHistory>${MAX_HISTORY}</maxHistory>
+            <maxFileSize>2GB</maxFileSize>
+        </rollingPolicy>
+        <encoder>
+            <pattern>${DEFAULT_PATTERN}</pattern>
+            <charset>UTF-8</charset>
+        </encoder>
+    </appender>
+    <appender name="ASYNC" class="ch.qos.logback.classic.AsyncAppender">
+        <discardingThreshold>0</discardingThreshold>
+        <queueSize>512</queueSize>
+        <appender-ref ref="ROLLING_FILE_DEFAULT"/>
+        <!--<appender-ref ref="ROLLING_FILE_ERROR"/>-->
+    </appender>
+
+
+    <root level="INFO">
+        <appender-ref ref="STDOUT"/>
+<!--        <appender-ref ref="ROLLING_FILE_DEFAULT"/>-->
+<!--        <appender-ref ref="ROLLING_FILE_ERROR"/>-->
+    </root>
+</configuration>
